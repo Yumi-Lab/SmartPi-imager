@@ -219,6 +219,26 @@
           "extract_size": 2685403136,
           "extract_sha256": "33446769295a61a4963b7f22fec34d18ea220de7a3961e40fd92e4b0074d9b76",
           "init_format": ""
+        },
+        {
+          "name": "RetroMi (retrogaming station)",
+          "description": "RetroPie-based retrogaming station for the SmartPi One.",
+          "icon": "https://yumi-lab.github.io/SmartPi-imager/icons/yumi40.png",
+          "website": "https://github.com/Yumi-Lab/RetroMi",
+          "devices": [
+            "smartpi-one",
+            "smartpad"
+          ],
+          "url": "https://github.com/Yumi-Lab/RetroMi/releases/download/1.0.4/2026-03-08-RetroMi-1.0.4-armbian-RetroMi.01.img.xz",
+          "release_date": "2026-03-08",
+          "image_download_size": 2883213504,
+          "extract_size": 7128220672,
+          "extract_sha256": "3c7bffaf45775fde09b2278a11690d79772adaa023f954fb218b698843d16427",
+          "init_format": "",
+          "url_parts": [
+            "https://github.com/Yumi-Lab/RetroMi/releases/download/1.0.4/2026-03-08-RetroMi-1.0.4-armbian-RetroMi.01.img.xz",
+            "https://github.com/Yumi-Lab/RetroMi/releases/download/1.0.4/2026-03-08-RetroMi-1.0.4-armbian-RetroMi.02.img.xz"
+          ]
         }
       ]
     }
