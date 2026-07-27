@@ -80,10 +80,8 @@
           "icon": "https://yumi-lab.github.io/SmartPi-imager/icons/yumi40.png",
           "repo": "Yumi-Lab/RetroMi",
           "tag": "1.0.4",
-          "asset_pattern": "\\.img\\.xz$",
-          "devices": ["smartpi-one", "smartpad"],
-          "enabled": false,
-          "note": "RetroMi releases are split 7z archives (>2GiB image); the imager needs a single .img.xz/.img.gz asset (or split complete-xz-stream parts). Re-enable once a flashable asset exists."
+          "asset_pattern": "\\.[0-9]+\\.img\\.xz$",
+          "devices": ["smartpi-one", "smartpad"]
         }
       ]
     }
