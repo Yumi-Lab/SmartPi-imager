@@ -42,6 +42,7 @@ public:
         InitFormatRole,
         ReleaseDataRole,
         UrlRole,
+        UrlPartsRole,
         RandomRole,
         SubItemsJsonRole,
         TooltipRole,
@@ -59,6 +60,7 @@ public:
         QString initFormat;
         QString releaseDate;
         QString url;
+        QString urlParts;  // space-separated part URLs for split images
         QString subitemsJson;
         QString subitemsUrl;
         QString tooltip;

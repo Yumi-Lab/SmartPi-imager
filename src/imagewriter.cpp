@@ -542,9 +542,12 @@ void ImageWriter::setEngine(QQmlApplicationEngine *engine)
 }
 
 /* Set URL to download from */
-void ImageWriter::setSrc(const QUrl &url, quint64 downloadLen, quint64 extrLen, QByteArray expectedHash, bool multifilesinzip, QString parentcategory, QString osname, QByteArray initFormat, QString releaseDate, QString bmapUrl)
+void ImageWriter::setSrc(const QUrl &url, quint64 downloadLen, quint64 extrLen, QByteArray expectedHash, bool multifilesinzip, QString parentcategory, QString osname, QByteArray initFormat, QString releaseDate, QString bmapUrl, QString urlParts)
 {
     _src = url;
+    _urlParts = urlParts.split(' ', Qt::SkipEmptyParts);
+    if (_src.isEmpty() && !_urlParts.isEmpty())
+        _src = QUrl(_urlParts.first());
     _downloadLen = downloadLen;
     _expectedHash = expectedHash;
     _extractSizeKnown = false;
@@ -1339,6 +1342,15 @@ void ImageWriter::startWrite()
         else
         {
             _thread = new DownloadExtractThread(urlstr, writeDevicePath.toLatin1(), _expectedHash, this);
+            if (_urlParts.count() > 1)
+            {
+                QList<QByteArray> parts;
+                parts.reserve(_urlParts.count());
+                for (int i = 0; i < _urlParts.count(); i++)
+                    parts.append(_urlParts.at(i).toLatin1());
+                _thread->setUrlParts(parts);
+                _thread->setTotalDownloadSize(_downloadLen);
+            }
             if (_repo.toString() == OSLIST_URL)
             {
                 DownloadStatsTelemetry *tele = new DownloadStatsTelemetry(urlstr, _parentCategory.toLatin1(), _osName.toLatin1(), isEmbeddedMode(), _currentLangcode, this);

@@ -343,6 +343,14 @@ bool OSListModel::reload()
         os.initFormat = obj["init_format"].toString();
         os.releaseDate = obj["release_date"].toString();
         os.url = obj["url"].toString();
+        {
+            const QJsonArray partsArray = obj["url_parts"].toArray();
+            QStringList parts;
+            parts.reserve(partsArray.size());
+            for (const auto &part : partsArray)
+                parts.append(part.toString());
+            os.urlParts = parts.join(QLatin1Char(' '));
+        }
         os.subitemsJson = obj["subitems_json"].toString();
         os.tooltip = obj["tooltip"].toString();
         os.website = obj["website"].toString();
@@ -390,7 +398,7 @@ QHash<int, QByteArray> OSListModel::roleNames() const
         { ImageDownloadSizeRole, "image_download_size" },
         { InitFormatRole, "init_format" },
         { ReleaseDataRole, "release_date" },
-        { UrlRole, "url" },{ RandomRole, "random" },
+        { UrlRole, "url" },{ UrlPartsRole, "url_parts" },{ RandomRole, "random" },
         { SubItemsJsonRole, "subitems_json" },
         { TooltipRole, "tooltip" },
         { WebsiteRole, "website" },
@@ -431,6 +439,8 @@ QVariant OSListModel::data(const QModelIndex &index, int role) const {
             return os.releaseDate;
         case UrlRole:
             return os.url;
+        case UrlPartsRole:
+            return os.urlParts;
         case RandomRole:
             return os.random;
         case SubItemsJsonRole:

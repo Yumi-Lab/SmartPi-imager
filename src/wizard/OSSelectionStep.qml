@@ -725,7 +725,8 @@ WizardStepBase {
                     model.name,
                     typeof(model.init_format) != "undefined" ? model.init_format : "",
                     typeof(model.release_date) != "undefined" ? model.release_date : "",
-                    typeof(model.bmap_url) != "undefined" ? model.bmap_url : ""
+                    typeof(model.bmap_url) != "undefined" ? model.bmap_url : "",
+                    typeof(model.url_parts) != "undefined" ? model.url_parts : ""
                 )
                 ImageWriterSingleton.setSWCapabilitiesList(model.capabilities)
 

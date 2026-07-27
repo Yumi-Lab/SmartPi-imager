@@ -154,6 +154,18 @@ void DownloadThread::setUserAgent(const QByteArray &ua)
     _useragent = ua;
 }
 
+void DownloadThread::setUrlParts(const QList<QByteArray> &parts)
+{
+    _urlParts = parts;
+    if (!_urlParts.isEmpty())
+        _url = _urlParts.first();
+}
+
+void DownloadThread::setTotalDownloadSize(quint64 total)
+{
+    _totalExpectedDlSize = total;
+}
+
 /* Curl write callback function, let it call the object oriented version */
 size_t DownloadThread::_curl_write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
@@ -706,63 +718,85 @@ void DownloadThread::run()
     emit preparationStatusUpdate(tr("Starting download..."));
     // Minimal logging during normal operation
     _timer.start();
-    CURLcode ret = curl_easy_perform(_c);
 
-    /* Deal with badly configured HTTP servers that terminate the connection quickly
-       if connections stalls for some seconds while kernel commits buffers to slow SD card.
-       And also reconnect if we detect from our end that transfer stalled for more than one minute */
-    while (ret == CURLE_PARTIAL_FILE || ret == CURLE_OPERATION_TIMEDOUT
-           || (ret == CURLE_HTTP2_STREAM && _lastDlNow != _lastFailureOffset)
-           || (ret == CURLE_HTTP2 && _lastDlNow != _lastFailureOffset)
-           || (ret == CURLE_RECV_ERROR && _lastDlNow != _lastFailureOffset)
-           || (ret == CURLE_SSL_CONNECT_ERROR && !http2SslFallback) )
+    /* Multi-part sources (split .img.xz) are fetched sequentially into the
+       same stream; every completed part advances _partBaseOffset so global
+       progress and per-part curl resume offsets stay consistent. */
+    const int partCount = _urlParts.count() > 1 ? _urlParts.count() : 1;
+    CURLcode ret = CURLE_OK;
+
+    for (_currentPart = 0; _currentPart < partCount; _currentPart++)
     {
-        time_t t = time(NULL);
-        qDebug() << "HTTP connection lost. Error:" << curl_easy_strerror(ret) << "Time:" << t;
-
-        // Track HTTP/2 specific failures for graceful fallback
-        if (ret == CURLE_HTTP2_STREAM || ret == CURLE_HTTP2) {
-            http2FailureCount++;
-            qDebug() << "HTTP/2 failure count:" << http2FailureCount << "/" << MAX_HTTP2_FAILURES;
-
-            if (http2FailureCount >= MAX_HTTP2_FAILURES) {
-                qDebug() << "Too many HTTP/2 failures, falling back to HTTP/1.1";
-                curl_easy_setopt(_c, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
-            }
-        }
-
-        // On SSL connect error (e.g. Schannel + HTTP/2 ALPN incompatibility on Windows),
-        // fall back to HTTP/1.1 and retry once. If it fails again, the loop exits.
-        if (ret == CURLE_SSL_CONNECT_ERROR) {
-            qDebug() << "SSL connect error, retrying with HTTP/1.1";
-            curl_easy_setopt(_c, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
-            http2SslFallback = true;
-        }
-
-        /* If last failure happened less than 5 seconds ago, something else may
-           be wrong. Sleep some time to prevent hammering server */
-        quint32 sleepMs = 0;
-        if (t - _lastFailureTime < 5)
+        if (partCount > 1)
         {
-            qDebug() << "Sleeping 5 seconds";
-            sleepMs = 5000;
-            ::sleep(5);
+            _partBaseOffset = _lastDlNow;
+            _startOffset = 0;
+            curl_easy_setopt(_c, CURLOPT_URL, _urlParts.at(_currentPart).constData());
+            curl_easy_setopt(_c, CURLOPT_RESUME_FROM_LARGE, (curl_off_t) 0);
+            qDebug() << "Downloading part" << (_currentPart + 1) << "of" << partCount;
         }
-        
-        // Emit network retry event for performance tracking
-        QString retryMetadata = QString("error: %1; offset: %2 MB; http2_failures: %3")
-            .arg(curl_easy_strerror(ret))
-            .arg(_lastDlNow / (1024 * 1024))
-            .arg(http2FailureCount);
-        emit eventNetworkRetry(sleepMs, retryMetadata);
-        
-        _lastFailureTime = t;
-
-        _startOffset = _lastDlNow;
-        _lastFailureOffset = _lastDlNow;
-        curl_easy_setopt(_c, CURLOPT_RESUME_FROM_LARGE, _startOffset);
 
         ret = curl_easy_perform(_c);
+
+        /* Deal with badly configured HTTP servers that terminate the connection quickly
+           if connections stalls for some seconds while kernel commits buffers to slow SD card.
+           And also reconnect if we detect from our end that transfer stalled for more than one minute */
+        while (ret == CURLE_PARTIAL_FILE || ret == CURLE_OPERATION_TIMEDOUT
+               || (ret == CURLE_HTTP2_STREAM && _lastDlNow != _lastFailureOffset)
+               || (ret == CURLE_HTTP2 && _lastDlNow != _lastFailureOffset)
+               || (ret == CURLE_RECV_ERROR && _lastDlNow != _lastFailureOffset)
+               || (ret == CURLE_SSL_CONNECT_ERROR && !http2SslFallback) )
+        {
+            time_t t = time(NULL);
+            qDebug() << "HTTP connection lost. Error:" << curl_easy_strerror(ret) << "Time:" << t;
+
+            // Track HTTP/2 specific failures for graceful fallback
+            if (ret == CURLE_HTTP2_STREAM || ret == CURLE_HTTP2) {
+                http2FailureCount++;
+                qDebug() << "HTTP/2 failure count:" << http2FailureCount << "/" << MAX_HTTP2_FAILURES;
+
+                if (http2FailureCount >= MAX_HTTP2_FAILURES) {
+                    qDebug() << "Too many HTTP/2 failures, falling back to HTTP/1.1";
+                    curl_easy_setopt(_c, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+                }
+            }
+
+            // On SSL connect error (e.g. Schannel + HTTP/2 ALPN incompatibility on Windows),
+            // fall back to HTTP/1.1 and retry once. If it fails again, the loop exits.
+            if (ret == CURLE_SSL_CONNECT_ERROR) {
+                qDebug() << "SSL connect error, retrying with HTTP/1.1";
+                curl_easy_setopt(_c, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+                http2SslFallback = true;
+            }
+
+            /* If last failure happened less than 5 seconds ago, something else may
+               be wrong. Sleep some time to prevent hammering server */
+            quint32 sleepMs = 0;
+            if (t - _lastFailureTime < 5)
+            {
+                qDebug() << "Sleeping 5 seconds";
+                sleepMs = 5000;
+                ::sleep(5);
+            }
+        
+            // Emit network retry event for performance tracking
+            QString retryMetadata = QString("error: %1; offset: %2 MB; http2_failures: %3")
+                .arg(curl_easy_strerror(ret))
+                .arg(_lastDlNow / (1024 * 1024))
+                .arg(http2FailureCount);
+            emit eventNetworkRetry(sleepMs, retryMetadata);
+        
+            _lastFailureTime = t;
+
+            _startOffset = _lastDlNow - _partBaseOffset;
+            _lastFailureOffset = _lastDlNow;
+            curl_easy_setopt(_c, CURLOPT_RESUME_FROM_LARGE, _startOffset);
+
+            ret = curl_easy_perform(_c);
+        }
+
+        if (ret != CURLE_OK)
+            break;
     }
 
     curl_easy_cleanup(_c);
@@ -1243,9 +1277,11 @@ size_t DownloadThread::_writeFile(const char *buf, size_t len, WriteCompleteCall
 
 bool DownloadThread::_progress(curl_off_t dltotal, curl_off_t dlnow, curl_off_t /*ultotal*/, curl_off_t /*ulnow*/)
 {
-    if (dltotal)
-        _lastDlTotal = _startOffset + dltotal;
-    _lastDlNow   = _startOffset + dlnow;
+    if (_totalExpectedDlSize)
+        _lastDlTotal = _totalExpectedDlSize;
+    else if (dltotal)
+        _lastDlTotal = _partBaseOffset + _startOffset + dltotal;
+    _lastDlNow   = _partBaseOffset + _startOffset + dlnow;
 
     return !_cancelled;
 }

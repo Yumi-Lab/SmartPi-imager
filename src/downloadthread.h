@@ -80,6 +80,19 @@ public:
     void setUserAgent(const QByteArray &ua);
 
     /*
+     * Multi-part download source: the parts are fetched sequentially and fed
+     * to the pipeline as one continuous stream. Each part must be a complete
+     * compressed stream (concatenated xz streams decode as a single image).
+     */
+    void setUrlParts(const QList<QByteArray> &parts);
+
+    /*
+     * Expected download size over all parts, for progress reporting
+     * (per-transfer content-length only covers the current part)
+     */
+    void setTotalDownloadSize(quint64 total);
+
+    /*
      * Returns true if download has been successful
      */
     bool successfull();
@@ -269,6 +282,10 @@ protected:
 
     CURL *_c;
     curl_off_t _startOffset;
+    QList<QByteArray> _urlParts;
+    int _currentPart = 0;
+    curl_off_t _partBaseOffset = 0;   // bytes completed in earlier parts
+    std::uint64_t _totalExpectedDlSize = 0;
     std::atomic<std::uint64_t> _lastDlTotal, _lastDlNow, _extractTotal, _verifyTotal, _lastVerifyNow, _bytesWritten;
     std::uint64_t _lastFailureOffset;
     qint64 _sectorsStart;
