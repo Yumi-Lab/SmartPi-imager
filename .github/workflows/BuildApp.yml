@@ -26,7 +26,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-            build-essential cmake ninja-build git libgnutls28-dev libfuse2
+            build-essential cmake ninja-build git pkg-config \
+            libgnutls28-dev libudev-dev libfuse2
 
       - name: Build AppImage
         run: ./create-appimage.sh --qt-root="$QT_ROOT_DIR"
