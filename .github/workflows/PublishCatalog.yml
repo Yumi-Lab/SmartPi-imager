@@ -33,17 +33,29 @@ jobs:
         run: |
           set -e
           mkdir -p out work
+          echo '[]' > categories.json
+
+          NCAT=$(jq '.categories | length' catalog/sources.json)
+          for ((c=0; c<NCAT; c++)); do
+          CAT=$(jq -c ".categories[$c]" catalog/sources.json)
+          echo "==== category: $(jq -r '.name' <<<"$CAT")"
           echo '[]' > entries.json
 
-          jq -c '.oses[]' catalog/sources.json | while read -r SRC; do
-            NAME=$(jq -r '.name' <<<"$SRC")
+          jq -c '.items[]' <<<"$CAT" | while read -r SRC; do
+            NAME=$(jq -r '.name // .inline_from_url' <<<"$SRC")
             ENABLED=$(jq -r '.enabled != false' <<<"$SRC")
             if [ "$ENABLED" != "true" ]; then
               echo "== $NAME : disabled, skipping"
               continue
             fi
 
-            if [ "$(jq -r '.subitems_url // empty' <<<"$SRC")" != "" ]; then
+            if [ "$(jq -r '.inline_from_url // empty' <<<"$SRC")" != "" ]; then
+              echo "== inlining entries from $NAME"
+              curl -sf "$(jq -r '.inline_from_url' <<<"$SRC")" | jq '.os_list' > inline.json
+              jq -s '.[0] + .[1]' entries.json inline.json > entries.tmp
+              mv entries.tmp entries.json
+              continue
+            elif [ "$(jq -r '.subitems_url // empty' <<<"$SRC")" != "" ]; then
               echo "== $NAME : sublist"
               jq '{name, description, icon, subitems_url}' <<<"$SRC" > entry.json
             else
@@ -105,7 +117,13 @@ jobs:
             mv entries.tmp entries.json
           done
 
-          jq -s '{imager: .[0].imager, os_list: .[1]}' catalog/sources.json entries.json > out/os_list.json
+          jq -s --argjson cat "$CAT" \
+            '.[0] + [{name: $cat.name, description: $cat.description, icon: $cat.icon, subitems: .[1]}]' \
+            categories.json entries.json > categories.tmp
+          mv categories.tmp categories.json
+          done
+
+          jq -s '{imager: .[0].imager, os_list: .[1]}' catalog/sources.json categories.json > out/os_list.json
           cat out/os_list.json
 
       - name: Publish to gh-pages
@@ -121,7 +139,7 @@ jobs:
           fi
           mkdir -p pages/icons
           cp out/os_list.json pages/os_list.json
-          cp catalog/icons/*.png pages/icons/
+          cp catalog/icons/*.png catalog/icons/*.svg pages/icons/
           cd pages
           git add os_list.json icons
           git commit -m "catalog: update os_list.json" || echo "nothing to commit"
