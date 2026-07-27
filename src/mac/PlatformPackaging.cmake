@@ -186,31 +186,22 @@ add_custom_command(TARGET ${PROJECT_NAME}
     COMMENT "Removing unused QML theme directories and modules (keeping Material theme + Basic fallback)"
 )
 
-# Install pre-compiled icon assets for dark mode + Liquid Glass support (macOS Tahoe+)
-# These were compiled from app_icon_macos.icon using Xcode's actool via a helper project
-# The pre-compiled Assets.car properly contains all appearance variants (light/dark/tinted)
-set(PRECOMPILED_ASSETS_CAR "${CMAKE_CURRENT_SOURCE_DIR}/icons/AppIcon-compiled.car")
+# Install the SmartPi Imager icon (icns). The upstream pre-compiled Assets.car
+# (Liquid Glass variants) carried Raspberry Pi branding and was dropped; the
+# bundle relies on CFBundleIconFile pointing at AppIcon.icns instead.
 set(PRECOMPILED_ICNS "${CMAKE_CURRENT_SOURCE_DIR}/icons/AppIcon-compiled.icns")
-if(EXISTS "${PRECOMPILED_ASSETS_CAR}" AND NOT BUILD_CLI_ONLY)
-    message(STATUS "Found pre-compiled icon Assets.car: ${PRECOMPILED_ASSETS_CAR}")
-    message(STATUS "Will install pre-compiled icons for Liquid Glass support on macOS Tahoe+")
-    
+if(EXISTS "${PRECOMPILED_ICNS}" AND NOT BUILD_CLI_ONLY)
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E echo "Installing pre-compiled icon assets for Liquid Glass..."
-        # Remove Qt's Assets.car - replace with our pre-compiled version containing AppIcon
+        COMMAND ${CMAKE_COMMAND} -E echo "Installing SmartPi Imager icon..."
+        # Remove Qt's Assets.car so it cannot override CFBundleIconFile
         COMMAND ${CMAKE_COMMAND} -E remove -f "${APP_BUNDLE_PATH}/Contents/Resources/Assets.car"
         # Remove any stale .icon copies from previous build attempts
         COMMAND ${CMAKE_COMMAND} -E remove_directory "${APP_BUNDLE_PATH}/Contents/Resources/app_icon_macos.icon"
         COMMAND ${CMAKE_COMMAND} -E remove_directory "${APP_BUNDLE_PATH}/Contents/Resources/AppIcon.icon"
-        # Copy pre-compiled Assets.car (contains all icon variants for Liquid Glass)
-        COMMAND ${CMAKE_COMMAND} -E copy 
-            "${PRECOMPILED_ASSETS_CAR}"
-            "${APP_BUNDLE_PATH}/Contents/Resources/Assets.car"
-        # Copy pre-compiled icns for legacy fallback (named AppIcon.icns to match CFBundleIconFile)
-        COMMAND ${CMAKE_COMMAND} -E copy 
+        COMMAND ${CMAKE_COMMAND} -E copy
             "${PRECOMPILED_ICNS}"
             "${APP_BUNDLE_PATH}/Contents/Resources/AppIcon.icns"
-        COMMENT "Installing pre-compiled icon assets for Liquid Glass support"
+        COMMENT "Installing SmartPi Imager icon"
     )
 endif()
 
