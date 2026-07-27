@@ -1,0 +1,118 @@
+name: Publish OS catalog
+
+# Builds the SmartPi Imager master repository (os_list.json) from
+# catalog/sources.json and publishes it on gh-pages:
+#   https://yumi-lab.github.io/SmartPi-imager/os_list.json
+#
+# For every enabled OS entry it downloads the release asset, computes the
+# uncompressed size and sha256 (required by the imager for verification),
+# and assembles a v4-style list with the device definitions.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [smartpi]
+    paths:
+      - catalog/**
+      - .github/workflows/PublishCatalog.yml
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    name: Generate os_list.json
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Generate os_list.json
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          mkdir -p out work
+          echo '[]' > entries.json
+
+          jq -c '.oses[]' catalog/sources.json | while read -r SRC; do
+            NAME=$(jq -r '.name' <<<"$SRC")
+            ENABLED=$(jq -r '.enabled // true' <<<"$SRC")
+            if [ "$ENABLED" != "true" ]; then
+              echo "== $NAME : disabled, skipping"
+              continue
+            fi
+
+            if [ "$(jq -r '.subitems_url // empty' <<<"$SRC")" != "" ]; then
+              echo "== $NAME : sublist"
+              jq '{name, description, icon, subitems_url}' <<<"$SRC" > entry.json
+            else
+              REPO=$(jq -r '.repo' <<<"$SRC")
+              TAG=$(jq -r '.tag' <<<"$SRC")
+              PATTERN=$(jq -r '.asset_pattern' <<<"$SRC")
+              echo "== $NAME ($REPO $TAG)"
+
+              RELEASE=$(gh release view "$TAG" --repo "$REPO" --json assets,publishedAt)
+              DATE=$(jq -r '.publishedAt[0:10]' <<<"$RELEASE")
+              ASSET=$(jq -r --arg p "$PATTERN" \
+                '.assets[] | select(.name | test($p)) | [.name, (.size|tostring)] | join("|")' \
+                <<<"$RELEASE" | head -n1)
+              if [ -z "$ASSET" ]; then
+                echo "ERROR: no asset matching $PATTERN in $REPO $TAG" >&2
+                exit 1
+              fi
+              ASSET_NAME="${ASSET%|*}"
+              DL_SIZE="${ASSET#*|}"
+              URL="https://github.com/${REPO}/releases/download/${TAG}/${ASSET_NAME}"
+
+              curl -sfL "$URL" -o work/image
+              case "$ASSET_NAME" in
+                *.xz)
+                  EXTRACT_SIZE=$(xz -l --robot work/image | awk '$1=="totals"{print $5}')
+                  EXTRACT_SHA=$(xz -dc work/image | sha256sum | cut -d' ' -f1)
+                  ;;
+                *.gz)
+                  # gzip's stored size field is only 32-bit: stream instead
+                  EXTRACT_SIZE=$(gzip -dc work/image | wc -c)
+                  EXTRACT_SHA=$(gzip -dc work/image | sha256sum | cut -d' ' -f1)
+                  ;;
+                *)
+                  EXTRACT_SIZE=$(stat -c%s work/image)
+                  EXTRACT_SHA=$(sha256sum work/image | cut -d' ' -f1)
+                  ;;
+              esac
+              rm -f work/image
+
+              jq --arg url "$URL" --arg date "$DATE" \
+                 --argjson dl "$DL_SIZE" --argjson ex "$EXTRACT_SIZE" --arg sha "$EXTRACT_SHA" \
+                 '{name, description, icon, website, devices}
+                  + {url: $url, release_date: $date, image_download_size: $dl,
+                     extract_size: $ex, extract_sha256: $sha, init_format: ""}' \
+                 <<<"$SRC" > entry.json
+            fi
+
+            jq -s '.[0] + [.[1]]' entries.json entry.json > entries.tmp
+            mv entries.tmp entries.json
+          done
+
+          jq -s '{imager: .[0].imager, os_list: .[1]}' catalog/sources.json entries.json > out/os_list.json
+          cat out/os_list.json
+
+      - name: Publish to gh-pages
+        run: |
+          set -e
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          if git ls-remote --exit-code origin gh-pages >/dev/null 2>&1; then
+            git fetch origin gh-pages
+            git worktree add pages origin/gh-pages
+          else
+            git worktree add --orphan -b gh-pages pages
+          fi
+          mkdir -p pages/icons
+          cp out/os_list.json pages/os_list.json
+          cp catalog/icons/*.png pages/icons/
+          cd pages
+          git add os_list.json icons
+          git commit -m "catalog: update os_list.json" || echo "nothing to commit"
+          git push origin HEAD:gh-pages

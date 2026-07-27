@@ -1,0 +1,73 @@
+{
+  "imager": {
+    "devices": [
+      {
+        "name": "SmartPi One",
+        "description": "Yumi Lab SmartPi One (Allwinner H3, 1GB RAM)",
+        "icon": "https://yumi-lab.github.io/SmartPi-imager/icons/yumi40.png",
+        "tags": ["smartpi-one"],
+        "architecture": "armhf",
+        "matching_type": "inclusive",
+        "default": true
+      },
+      {
+        "name": "SmartPad",
+        "description": "Yumi Lab SmartPad (SmartPi One with 7-inch touchscreen)",
+        "icon": "https://yumi-lab.github.io/SmartPi-imager/icons/yumi40.png",
+        "tags": ["smartpad"],
+        "architecture": "armhf",
+        "matching_type": "inclusive"
+      }
+    ]
+  },
+  "oses": [
+    {
+      "name": "YumiOS (Klipper 3D printing)",
+      "description": "Klipper + Mainsail, ready to print. The official Yumi Lab 3D-printing OS.",
+      "website": "https://github.com/Yumi-Lab/YumiOS",
+      "icon": "https://yumi-lab.github.io/SmartPi-imager/icons/yumi40.png",
+      "repo": "Yumi-Lab/YumiOS",
+      "tag": "1.3.4",
+      "asset_pattern": "\\.img\\.xz$",
+      "devices": ["smartpad", "smartpi-one"]
+    },
+    {
+      "name": "Batocera (retrogaming)",
+      "description": "Plug-and-play retrogaming distribution for the SmartPi One.",
+      "website": "https://batocera.org",
+      "icon": "https://yumi-lab.github.io/SmartPi-imager/icons/yumi40.png",
+      "repo": "Yumi-Lab/Batocera-SmartPiOne",
+      "tag": "v38",
+      "asset_pattern": "\\.img\\.gz$",
+      "devices": ["smartpi-one", "smartpad"]
+    },
+    {
+      "name": "DietPi (lightweight server)",
+      "description": "Ultra-light Debian server image for the SmartPi One, converted from the Yumi Armbian base.",
+      "website": "https://github.com/Yumi-Lab/DietPi-SmartPi",
+      "icon": "https://yumi-lab.github.io/SmartPi-imager/icons/yumi40.png",
+      "repo": "Yumi-Lab/DietPi-SmartPi",
+      "tag": "v1.8.0-rc4",
+      "asset_pattern": "\\.img\\.xz$",
+      "devices": ["smartpi-one", "smartpad"]
+    },
+    {
+      "name": "SmartPi base OS (Armbian)",
+      "description": "Debian and Ubuntu base images (server and desktop) built by Yumi Lab.",
+      "icon": "https://yumi-lab.github.io/SmartPi-imager/icons/yumi40.png",
+      "subitems_url": "https://yumi-lab.github.io/SmartPi-armbian/os_list.json"
+    },
+    {
+      "name": "RetroMi (retrogaming station)",
+      "description": "RetroPie-based retrogaming station for the SmartPi One.",
+      "website": "https://github.com/Yumi-Lab/RetroMi",
+      "icon": "https://yumi-lab.github.io/SmartPi-imager/icons/yumi40.png",
+      "repo": "Yumi-Lab/RetroMi",
+      "tag": "1.0.4",
+      "asset_pattern": "\\.img\\.xz$",
+      "devices": ["smartpi-one", "smartpad"],
+      "enabled": false,
+      "note": "RetroMi releases are split 7z archives (>2GiB image); the imager needs a single .img.xz/.img.gz asset. Re-enable once a flashable asset exists."
+    }
+  ]
+}
