@@ -1379,8 +1379,8 @@ Item {
         FocusableText {
             id: repoBodyText
             text: repositoryUrlDialog.isLocalFile
-                ? qsTr("You are opening a local Raspberry Pi Imager manifest file. This will replace the current OS list with the contents of this file.")
-                : qsTr("A website is requesting to switch Raspberry Pi Imager to use a custom OS repository.\n\n") +
+                ? qsTr("You are opening a local SmartPi Imager manifest file. This will replace the current OS list with the contents of this file.")
+                : qsTr("A website is requesting to switch SmartPi Imager to use a custom OS repository.\n\n") +
                   qsTr("Only accept if you trust this source and intentionally clicked a link to open this repository.")
             font.pointSize: Style.fontSizeFormLabel
             font.family: Style.fontFamily

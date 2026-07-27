@@ -1,15 +1,18 @@
-# Raspberry Pi Imager
+# SmartPi Imager
+
+Flash official Yumi Lab operating systems to an SD card for the **SmartPi One** and **SmartPad** — in a couple of clicks.
+
+Built-in OS catalog:
+
+- **YumiOS** — Klipper 3D-printing OS with Mainsail
+- **Batocera** — retrogaming (SmartPi One)
+- **DietPi** — ultra-light server
+- **Armbian base images** — Debian / Ubuntu, server & desktop
+- **RetroMi** — retrogaming station (coming to the catalog soon)
+
+SmartPi Imager is a fork of [Raspberry Pi Imager](https://github.com/raspberrypi/rpi-imager) by Raspberry Pi Ltd, rebranded and preconfigured with the Yumi Lab image repository (`https://yumi-lab.github.io/SmartPi-imager/os_list.json`). Telemetry is disabled by default and no data is sent to Raspberry Pi.
 
 ![](./screenshot.png)
-
-Raspberry Pi Imaging Utility
-
-- To install on Raspberry Pi OS, use `sudo apt update && sudo apt install rpi-imager`.
-- Download the latest version for Windows, macOS and Ubuntu from the [Raspberry Pi downloads page](https://www.raspberrypi.com/software/).
-
-## How to install and use Raspberry Pi Imager
-
-Please see our [official documentation](https://www.raspberrypi.com/documentation/computers/getting-started.html#raspberry-pi-imager).
 
 ## Development
 

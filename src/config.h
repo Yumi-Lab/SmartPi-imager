@@ -8,7 +8,7 @@
 
 
 /* Repository URL */
-#define OSLIST_URL                              "https://downloads.raspberrypi.com/os_list_imagingutility_v4.json"
+#define OSLIST_URL                              "https://yumi-lab.github.io/SmartPi-imager/os_list.json"
 
 /* Custom repository manifest file extension (without leading dot) */
 #define MANIFEST_EXTENSION                      "rpi-imager-manifest"
@@ -20,7 +20,7 @@
 #define TIME_URL                                "http://downloads.raspberrypi.com/"
 
 /* Phone home the name of images downloaded for image popularity ranking */
-#define TELEMETRY_URL                           "https://rpi-imager-stats.raspberrypi.com/downloads"
+#define TELEMETRY_URL                           "https://yumi-lab.github.io/SmartPi-imager/downloads"
 
 /* Hash algorithm for verifying (uncompressed image) checksum */
 #define OSLIST_HASH_ALGORITHM                   QCryptographicHash::Sha256

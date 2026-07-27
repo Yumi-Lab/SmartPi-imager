@@ -70,7 +70,7 @@ BaseDialog {
         ImButton {
             id: noButton
             text: CommonStrings.no
-            accessibleDescription: qsTr("Continue using the current version of Raspberry Pi Imager")
+            accessibleDescription: qsTr("Continue using the current version of SmartPi Imager")
             activeFocusOnTab: true
             onClicked: {
                 root.reject()

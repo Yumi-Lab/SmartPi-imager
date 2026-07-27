@@ -298,7 +298,7 @@ void applyQuirks() {
     HANDLE hMutex = CreateMutexW(nullptr, TRUE, L"Global\\RaspberryPiImagerMutex");
     if (GetLastError() == ERROR_ALREADY_EXISTS) {
         // Another instance running
-        MessageBoxW(nullptr, L"Raspberry Pi Imager is already running.", L"Raspberry Pi Imager", MB_OK | MB_ICONINFORMATION);
+        MessageBoxW(nullptr, L"SmartPi Imager is already running.", L"SmartPi Imager", MB_OK | MB_ICONINFORMATION);
         exit(0);
     }
 }

@@ -6,12 +6,12 @@ if(BUILD_CLI_ONLY)
 else()
     # GUI build: create app bundle
     # Set application name with proper spacing
-    set(APP_NAME "Raspberry Pi Imager")
+    set(APP_NAME "SmartPi Imager")
 
     # Set all required bundle properties
     set(MACOSX_BUNDLE_BUNDLE_NAME "${APP_NAME}")
     set(MACOSX_BUNDLE_EXECUTABLE_NAME "${PROJECT_NAME}")
-    set(MACOSX_BUNDLE_GUI_IDENTIFIER "com.raspberrypi.rpi-imager")
+    set(MACOSX_BUNDLE_GUI_IDENTIFIER "com.yumi-lab.smartpi-imager")
     set(MACOSX_BUNDLE_ICON_FILE "AppIcon")
     string(TIMESTAMP CURRENT_YEAR "%Y")
     set(MACOSX_BUNDLE_COPYRIGHT "Copyright © 2020-${CURRENT_YEAR} Raspberry Pi Ltd")

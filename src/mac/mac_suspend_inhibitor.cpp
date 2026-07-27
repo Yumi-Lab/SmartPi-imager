@@ -4,7 +4,7 @@
 
 MacSuspendInhibitor::MacSuspendInhibitor()
 {
-    CFStringRef name = CFSTR("Raspberry Pi Imager");
+    CFStringRef name = CFSTR("SmartPi Imager");
 
     // Prevent system sleep
     auto result = IOPMAssertionCreateWithName(
