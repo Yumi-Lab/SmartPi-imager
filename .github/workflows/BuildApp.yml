@@ -1,0 +1,103 @@
+name: Build SmartPi Imager
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [smartpi]
+    paths-ignore:
+      - "catalog/**"
+      - "**.md"
+      - ".github/workflows/PublishCatalog.yml"
+
+jobs:
+  linux:
+    name: Linux AppImage (x86_64)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: "6.9.*"
+          cache: true
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential cmake ninja-build git libgnutls28-dev libfuse2
+
+      - name: Build AppImage
+        run: ./create-appimage.sh --qt-root="$QT_ROOT_DIR"
+
+      - name: Upload AppImage
+        uses: actions/upload-artifact@v4
+        with:
+          name: SmartPi-Imager-linux-x86_64
+          path: "*.AppImage"
+          if-no-files-found: error
+
+  windows:
+    name: Windows installer (x64)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt (MinGW)
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: "6.9.*"
+          arch: win64_mingw
+          tools: "tools_mingw1310"
+          cache: true
+
+      - name: Install Ninja
+        run: choco install ninja -y
+
+      - name: Configure
+        shell: pwsh
+        run: |
+          cmake -S src -B build -G Ninja `
+            -DCMAKE_BUILD_TYPE=MinSizeRel `
+            -DQt6_ROOT="$env:QT_ROOT_DIR" `
+            -DMINGW64_ROOT="$env:IQTA_TOOLS/mingw1310_64" `
+            -DENABLE_INNO_INSTALLER=ON
+
+      - name: Build installer
+        run: cmake --build build --target inno_installer --parallel
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: SmartPi-Imager-windows-x64
+          path: build/installer/*.exe
+          if-no-files-found: error
+
+  macos:
+    name: macOS DMG (arm64)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: "6.9.*"
+          cache: true
+
+      - name: Configure
+        run: |
+          cmake -S src -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DQt6_ROOT="$QT_ROOT_DIR"
+
+      - name: Build DMG
+        run: cmake --build build --target dmg --parallel
+
+      - name: Upload DMG
+        uses: actions/upload-artifact@v4
+        with:
+          name: SmartPi-Imager-macos-arm64
+          path: build/*.dmg
+          if-no-files-found: error
