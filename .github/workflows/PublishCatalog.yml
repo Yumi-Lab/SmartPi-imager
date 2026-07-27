@@ -54,18 +54,26 @@ jobs:
 
               RELEASE=$(gh release view "$TAG" --repo "$REPO" --json assets,publishedAt)
               DATE=$(jq -r '.publishedAt[0:10]' <<<"$RELEASE")
-              ASSET=$(jq -r --arg p "$PATTERN" \
+              # All matching assets, sorted: several matches = a split image
+              # whose parts are complete xz streams (concatenated = one image)
+              jq -r --arg p "$PATTERN" \
                 '.assets[] | select(.name | test($p)) | [.name, (.size|tostring)] | join("|")' \
-                <<<"$RELEASE" | head -n1)
-              if [ -z "$ASSET" ]; then
+                <<<"$RELEASE" | sort > assets.txt
+              if [ ! -s assets.txt ]; then
                 echo "ERROR: no asset matching $PATTERN in $REPO $TAG" >&2
                 exit 1
               fi
-              ASSET_NAME="${ASSET%|*}"
-              DL_SIZE="${ASSET#*|}"
+              ASSET_NAME=$(head -n1 assets.txt | cut -d'|' -f1)
+              DL_SIZE=$(cut -d'|' -f2 assets.txt | paste -sd+ - | bc)
               URL="https://github.com/${REPO}/releases/download/${TAG}/${ASSET_NAME}"
+              PARTS_JSON=$(cut -d'|' -f1 assets.txt \
+                | jq -R --arg base "https://github.com/${REPO}/releases/download/${TAG}/" '$base + .' | jq -s .)
+              PART_COUNT=$(wc -l < assets.txt)
 
-              curl -sfL "$URL" -o work/image
+              : > work/image
+              while IFS='|' read -r NAME _; do
+                curl -sfL "https://github.com/${REPO}/releases/download/${TAG}/${NAME}" >> work/image
+              done < assets.txt
               case "$ASSET_NAME" in
                 *.xz)
                   EXTRACT_SIZE=$(xz -l --robot work/image | awk '$1=="totals"{print $5}')
@@ -85,9 +93,11 @@ jobs:
 
               jq --arg url "$URL" --arg date "$DATE" \
                  --argjson dl "$DL_SIZE" --argjson ex "$EXTRACT_SIZE" --arg sha "$EXTRACT_SHA" \
+                 --argjson parts "$PARTS_JSON" --argjson n "$PART_COUNT" \
                  '{name, description, icon, website, devices}
                   + {url: $url, release_date: $date, image_download_size: $dl,
-                     extract_size: $ex, extract_sha256: $sha, init_format: ""}' \
+                     extract_size: $ex, extract_sha256: $sha, init_format: ""}
+                  + (if $n > 1 then {url_parts: $parts} else {} end)' \
                  <<<"$SRC" > entry.json
             fi
 
