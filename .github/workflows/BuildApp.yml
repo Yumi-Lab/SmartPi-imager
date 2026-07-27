@@ -82,6 +82,8 @@ jobs:
   macos:
     name: macOS DMG (arm64)
     runs-on: macos-latest
+    env:
+      HAVE_SIGNING: ${{ secrets.APPLE_CERT_P12 != '' && 'yes' || 'no' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -91,11 +93,50 @@ jobs:
           version: "6.9.*"
           cache: true
 
+      - name: Import Developer ID certificate
+        if: env.HAVE_SIGNING == 'yes'
+        env:
+          CERT_P12: ${{ secrets.APPLE_CERT_P12 }}
+          CERT_PASSWORD: ${{ secrets.APPLE_CERT_PASSWORD }}
+        run: |
+          echo "$CERT_P12" | base64 -d > /tmp/cert.p12
+          security create-keychain -p ci build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p ci build.keychain
+          security set-keychain-settings -t 3600 build.keychain
+          security import /tmp/cert.p12 -k build.keychain -P "$CERT_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k ci build.keychain > /dev/null
+          rm -f /tmp/cert.p12
+          IDENTITY=$(security find-identity -v -p codesigning build.keychain | awk -F'"' '/Developer ID Application/{print $2; exit}')
+          if [ -z "$IDENTITY" ]; then
+            echo "No Developer ID Application identity in APPLE_CERT_P12" >&2
+            exit 1
+          fi
+          echo "SIGNING_IDENTITY=$IDENTITY" >> "$GITHUB_ENV"
+
+      - name: Prepare notarization
+        if: env.HAVE_SIGNING == 'yes'
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+        run: |
+          xcrun notarytool store-credentials smartpi-imager \
+            --apple-id "$APPLE_ID" --team-id "$APPLE_TEAM_ID" --password "$APPLE_APP_PASSWORD"
+          brew install create-dmg
+
       - name: Configure
         run: |
+          EXTRA=()
+          if [ -n "$SIGNING_IDENTITY" ]; then
+            EXTRA+=(-DIMAGER_SIGNING_IDENTITY="$SIGNING_IDENTITY"
+                    -DIMAGER_NOTARIZE_APP=ON
+                    -DIMAGER_NOTARIZE_KEYCHAIN_PROFILE=smartpi-imager)
+          fi
           cmake -S src -B build \
             -DCMAKE_BUILD_TYPE=Release \
-            -DQt6_ROOT="$QT_ROOT_DIR"
+            -DQt6_ROOT="$QT_ROOT_DIR" \
+            "${EXTRA[@]}"
 
       - name: Build DMG
         # Unbounded --parallel on the Makefile generator spawns unlimited jobs

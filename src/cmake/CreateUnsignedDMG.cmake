@@ -8,7 +8,7 @@
 
 include("${VERSION_VARS_FILE}")
 
-set(FINAL_DMG_PATH "${BUILD_DIR}/${APP_NAME}-${IMAGER_VERSION_STR}.dmg")
+set(FINAL_DMG_PATH "${BUILD_DIR}/SmartPi-Imager-${IMAGER_VERSION_STR}.dmg")
 
 # Ad-hoc sign the bundle: macdeployqt invalidates the linker signatures when
 # it rewrites library paths, and arm64 macOS refuses to launch a bundle whose
