@@ -37,7 +37,7 @@ jobs:
 
           jq -c '.oses[]' catalog/sources.json | while read -r SRC; do
             NAME=$(jq -r '.name' <<<"$SRC")
-            ENABLED=$(jq -r '.enabled // true' <<<"$SRC")
+            ENABLED=$(jq -r '.enabled != false' <<<"$SRC")
             if [ "$ENABLED" != "true" ]; then
               echo "== $NAME : disabled, skipping"
               continue
