@@ -2,8 +2,8 @@
   "imager": {
     "devices": [
       {
-        "name": "SmartPi One",
-        "description": "Yumi Lab SmartPi One (Allwinner H3, 1GB RAM)",
+        "name": "YUMi SmartPi One",
+        "description": "Single Board Computer",
         "icon": "https://yumi-lab.github.io/SmartPi-imager/icons/yumi40.png",
         "tags": [
           "smartpi-one"
@@ -13,8 +13,8 @@
         "default": true
       },
       {
-        "name": "SmartPad",
-        "description": "Yumi Lab SmartPad (SmartPi One with 7-inch touchscreen)",
+        "name": "YUMi SmartPad",
+        "description": "Includes a capacitive 800x480 touch screen",
         "icon": "https://yumi-lab.github.io/SmartPi-imager/icons/yumi40.png",
         "tags": [
           "smartpad"
@@ -26,58 +26,201 @@
   },
   "os_list": [
     {
-      "name": "YumiOS (Klipper 3D printing)",
-      "description": "Klipper + Mainsail, ready to print. The official Yumi Lab 3D-printing OS.",
-      "icon": "https://yumi-lab.github.io/SmartPi-imager/icons/yumi40.png",
-      "website": "https://github.com/Yumi-Lab/YumiOS",
-      "devices": [
-        "smartpad",
-        "smartpi-one"
-      ],
-      "url": "https://github.com/Yumi-Lab/YumiOS/releases/download/1.3.4/2025-10-28-YumiOS-1.3.4-armbian-smartpad.img.xz",
-      "release_date": "2025-10-28",
-      "image_download_size": 2077017076,
-      "extract_size": 9091153920,
-      "extract_sha256": "a7f2ed531e871fc9ecf93cb3f889556375065592b381d8124c6303803eb88734",
-      "init_format": ""
+      "name": "Linux OS",
+      "description": "Base Linux images for the SmartPi One: Debian, Ubuntu and DietPi.",
+      "icon": "https://yumi-lab.github.io/SmartPi-imager/icons/tux.svg",
+      "subitems": [
+        {
+          "name": "DietPi (lightweight server)",
+          "description": "Ultra-light Debian 13 (Trixie) server image, converted from the Yumi Armbian base.",
+          "icon": "https://yumi-lab.github.io/SmartPi-imager/icons/dietpi.svg",
+          "website": "https://github.com/Yumi-Lab/DietPi-SmartPi",
+          "devices": [
+            "smartpi-one",
+            "smartpad"
+          ],
+          "url": "https://github.com/Yumi-Lab/DietPi-SmartPi/releases/download/v1.8.0-rc4/Yumi-smartpi1-trixie-debian13-dietpi-2026-07-27-0444.img.xz",
+          "release_date": "2026-07-27",
+          "image_download_size": 309123528,
+          "extract_size": 2315718656,
+          "extract_sha256": "344ec9d62884da1a6d97173162fd2d895028280e6e783a00b8c42a7403bfa328",
+          "init_format": ""
+        },
+        {
+          "name": "Debian 12 (Bookworm) Desktop (XFCE) v1.8.0-rc4",
+          "description": "Armbian Debian 12 (Bookworm) Desktop (XFCE) for the YUMi SmartPi One. Instant boot logo, works on any screen up to 4K UHD, SSH over USB.",
+          "icon": "https://yumi-lab.github.io/SmartPi-armbian/icons/debian.svg",
+          "url": "https://github.com/Yumi-Lab/SmartPi-armbian/releases/download/v1.8.0-rc4/Yumi-smartpi1-bookworm-debian12-desktop-2026-07-27-0249.img.xz",
+          "release_date": "2026-07-27",
+          "image_download_size": 1422260488,
+          "extract_size": 7059013632,
+          "extract_sha256": "28ce1b9cfb3744ef19002aeac5f4969751d38c163d6ba9fdd8febbaec08a8184",
+          "init_format": "",
+          "devices": [
+            "smartpi-one",
+            "smartpad"
+          ],
+          "capabilities": []
+        },
+        {
+          "name": "Debian 12 (Bookworm) Server v1.8.0-rc4",
+          "description": "Armbian Debian 12 (Bookworm) Server for the YUMi SmartPi One. Instant boot logo, works on any screen up to 4K UHD, SSH over USB.",
+          "icon": "https://yumi-lab.github.io/SmartPi-armbian/icons/debian.svg",
+          "url": "https://github.com/Yumi-Lab/SmartPi-armbian/releases/download/v1.8.0-rc4/Yumi-smartpi1-bookworm-debian12-server-2026-07-27-0249.img.xz",
+          "release_date": "2026-07-27",
+          "image_download_size": 535601992,
+          "extract_size": 2797600768,
+          "extract_sha256": "8845b1fbd6c80c4f922d04b98df8d05a0e44c355f436267384f51bc881d9c0f2",
+          "init_format": "",
+          "devices": [
+            "smartpi-one",
+            "smartpad"
+          ],
+          "capabilities": []
+        },
+        {
+          "name": "Debian 11 (Bullseye) Server v1.8.0-rc4",
+          "description": "Armbian Debian 11 (Bullseye) Server for the YUMi SmartPi One. Instant boot logo, works on any screen up to 4K UHD, SSH over USB.",
+          "icon": "https://yumi-lab.github.io/SmartPi-armbian/icons/debian.svg",
+          "url": "https://github.com/Yumi-Lab/SmartPi-armbian/releases/download/v1.8.0-rc4/Yumi-smartpi1-bullseye-debian11-server-2026-07-27-0249.img.xz",
+          "release_date": "2026-07-27",
+          "image_download_size": 488037900,
+          "extract_size": 2512388096,
+          "extract_sha256": "5a8f96588bb0a2a9dc5cd3f88aabf1dac88cc7c26e41e962156dc74051dc7303",
+          "init_format": "",
+          "devices": [
+            "smartpi-one",
+            "smartpad"
+          ],
+          "capabilities": []
+        },
+        {
+          "name": "Ubuntu 22.04 LTS (Jammy) Server v1.8.0-rc4",
+          "description": "Armbian Ubuntu 22.04 LTS (Jammy) Server for the YUMi SmartPi One. Instant boot logo, works on any screen up to 4K UHD, SSH over USB.",
+          "icon": "https://yumi-lab.github.io/SmartPi-armbian/icons/ubuntu.svg",
+          "url": "https://github.com/Yumi-Lab/SmartPi-armbian/releases/download/v1.8.0-rc4/Yumi-smartpi1-jammy-ubuntu22.04-server-2026-07-27-0249.img.xz",
+          "release_date": "2026-07-27",
+          "image_download_size": 570209660,
+          "extract_size": 3422552064,
+          "extract_sha256": "b93e205173b6d67a3977a9fd30653046cc3b44501c9f953e34a51beaca3e3eb3",
+          "init_format": "",
+          "devices": [
+            "smartpi-one",
+            "smartpad"
+          ],
+          "capabilities": []
+        },
+        {
+          "name": "Ubuntu 24.04 LTS (Noble) Desktop (XFCE) v1.8.0-rc4",
+          "description": "Armbian Ubuntu 24.04 LTS (Noble) Desktop (XFCE) for the YUMi SmartPi One. Instant boot logo, works on any screen up to 4K UHD, SSH over USB.",
+          "icon": "https://yumi-lab.github.io/SmartPi-armbian/icons/ubuntu.svg",
+          "url": "https://github.com/Yumi-Lab/SmartPi-armbian/releases/download/v1.8.0-rc4/Yumi-smartpi1-noble-ubuntu24.04-desktop-2026-07-27-0249.img.xz",
+          "release_date": "2026-07-27",
+          "image_download_size": 1340891412,
+          "extract_size": 6945767424,
+          "extract_sha256": "20d763281cea4bf9672b657dda2deb1447475b06c2e9426b18c249b9e196e65c",
+          "init_format": "",
+          "devices": [
+            "smartpi-one",
+            "smartpad"
+          ],
+          "capabilities": []
+        },
+        {
+          "name": "Ubuntu 24.04 LTS (Noble) Server v1.8.0-rc4",
+          "description": "Armbian Ubuntu 24.04 LTS (Noble) Server for the YUMi SmartPi One. Instant boot logo, works on any screen up to 4K UHD, SSH over USB.",
+          "icon": "https://yumi-lab.github.io/SmartPi-armbian/icons/ubuntu.svg",
+          "url": "https://github.com/Yumi-Lab/SmartPi-armbian/releases/download/v1.8.0-rc4/Yumi-smartpi1-noble-ubuntu24.04-server-2026-07-27-0249.img.xz",
+          "release_date": "2026-07-27",
+          "image_download_size": 553294248,
+          "extract_size": 2919235584,
+          "extract_sha256": "f046640505ef81dbb16f1618185108007a2f0e22964adb1f70b1249e6ad139b3",
+          "init_format": "",
+          "devices": [
+            "smartpi-one",
+            "smartpad"
+          ],
+          "capabilities": []
+        },
+        {
+          "name": "Debian 13 (Trixie) Desktop (XFCE) v1.8.0-rc4",
+          "description": "Armbian Debian 13 (Trixie) Desktop (XFCE) for the YUMi SmartPi One. Instant boot logo, works on any screen up to 4K UHD, SSH over USB.",
+          "icon": "https://yumi-lab.github.io/SmartPi-armbian/icons/debian.svg",
+          "url": "https://github.com/Yumi-Lab/SmartPi-armbian/releases/download/v1.8.0-rc4/Yumi-smartpi1-trixie-debian13-desktop-2026-07-27-0249.img.xz",
+          "release_date": "2026-07-27",
+          "image_download_size": 1438000644,
+          "extract_size": 7327449088,
+          "extract_sha256": "45219980718583489e4b010728606f1122bd8e58089ecf1f765ff91ad56321a7",
+          "init_format": "",
+          "devices": [
+            "smartpi-one",
+            "smartpad"
+          ],
+          "capabilities": []
+        },
+        {
+          "name": "Debian 13 (Trixie) Server v1.8.0-rc4",
+          "description": "Armbian Debian 13 (Trixie) Server for the YUMi SmartPi One. Instant boot logo, works on any screen up to 4K UHD, SSH over USB.",
+          "icon": "https://yumi-lab.github.io/SmartPi-armbian/icons/debian.svg",
+          "url": "https://github.com/Yumi-Lab/SmartPi-armbian/releases/download/v1.8.0-rc4/Yumi-smartpi1-trixie-debian13-server-2026-07-27-0249.img.xz",
+          "release_date": "2026-07-27",
+          "image_download_size": 553716948,
+          "extract_size": 2919235584,
+          "extract_sha256": "51c1cd18fe794353944647015fff0f79f365efbe42eb4ca64baa39f95e7607b3",
+          "init_format": "",
+          "devices": [
+            "smartpi-one",
+            "smartpad"
+          ],
+          "capabilities": []
+        }
+      ]
     },
     {
-      "name": "Batocera (retrogaming)",
-      "description": "Plug-and-play retrogaming distribution for the SmartPi One.",
-      "icon": "https://yumi-lab.github.io/SmartPi-imager/icons/yumi40.png",
-      "website": "https://batocera.org",
-      "devices": [
-        "smartpi-one",
-        "smartpad"
-      ],
-      "url": "https://github.com/Yumi-Lab/Batocera-SmartPiOne/releases/download/v38/batocera-h3-smartpione-38-20231018.img.gz",
-      "release_date": "2026-04-07",
-      "image_download_size": 1210144108,
-      "extract_size": 2685403136,
-      "extract_sha256": "33446769295a61a4963b7f22fec34d18ea220de7a3961e40fd92e4b0074d9b76",
-      "init_format": ""
+      "name": "3D printers",
+      "description": "Operating systems for 3D printing.",
+      "icon": "https://yumi-lab.github.io/SmartPi-imager/icons/printer3d.svg",
+      "subitems": [
+        {
+          "name": "YumiOS (Klipper)",
+          "description": "Klipper + Mainsail, ready to print. The official Yumi Lab 3D-printing OS.",
+          "icon": "https://yumi-lab.github.io/SmartPi-imager/icons/yumi40.png",
+          "website": "https://github.com/Yumi-Lab/YumiOS",
+          "devices": [
+            "smartpad",
+            "smartpi-one"
+          ],
+          "url": "https://github.com/Yumi-Lab/YumiOS/releases/download/1.3.4/2025-10-28-YumiOS-1.3.4-armbian-smartpad.img.xz",
+          "release_date": "2025-10-28",
+          "image_download_size": 2077017076,
+          "extract_size": 9091153920,
+          "extract_sha256": "a7f2ed531e871fc9ecf93cb3f889556375065592b381d8124c6303803eb88734",
+          "init_format": ""
+        }
+      ]
     },
     {
-      "name": "DietPi (lightweight server)",
-      "description": "Ultra-light Debian server image for the SmartPi One, converted from the Yumi Armbian base.",
-      "icon": "https://yumi-lab.github.io/SmartPi-imager/icons/yumi40.png",
-      "website": "https://github.com/Yumi-Lab/DietPi-SmartPi",
-      "devices": [
-        "smartpi-one",
-        "smartpad"
-      ],
-      "url": "https://github.com/Yumi-Lab/DietPi-SmartPi/releases/download/v1.8.0-rc4/Yumi-smartpi1-trixie-debian13-dietpi-2026-07-27-0444.img.xz",
-      "release_date": "2026-07-27",
-      "image_download_size": 309123528,
-      "extract_size": 2315718656,
-      "extract_sha256": "344ec9d62884da1a6d97173162fd2d895028280e6e783a00b8c42a7403bfa328",
-      "init_format": ""
-    },
-    {
-      "name": "SmartPi base OS (Armbian)",
-      "description": "Debian and Ubuntu base images (server and desktop) built by Yumi Lab.",
-      "icon": "https://yumi-lab.github.io/SmartPi-imager/icons/yumi40.png",
-      "subitems_url": "https://yumi-lab.github.io/SmartPi-armbian/os_list.json"
+      "name": "Retrogaming",
+      "description": "Plug-and-play retrogaming distributions.",
+      "icon": "https://yumi-lab.github.io/SmartPi-imager/icons/gamepad.svg",
+      "subitems": [
+        {
+          "name": "Batocera",
+          "description": "Plug-and-play retrogaming distribution for the SmartPi One.",
+          "icon": "https://yumi-lab.github.io/SmartPi-imager/icons/batocera.png",
+          "website": "https://batocera.org",
+          "devices": [
+            "smartpi-one",
+            "smartpad"
+          ],
+          "url": "https://github.com/Yumi-Lab/Batocera-SmartPiOne/releases/download/v38/batocera-h3-smartpione-38-20231018.img.gz",
+          "release_date": "2026-04-07",
+          "image_download_size": 1210144108,
+          "extract_size": 2685403136,
+          "extract_sha256": "33446769295a61a4963b7f22fec34d18ea220de7a3961e40fd92e4b0074d9b76",
+          "init_format": ""
+        }
+      ]
     }
   ]
 }
